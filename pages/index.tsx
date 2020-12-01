@@ -27,29 +27,41 @@ export default function Home() {
   const [URL, setURL] = useState<string | false>("");
   const editDiv = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    new ClipboardJS("button");
+    new ClipboardJS("div");
     editDiv.current.focus();
   }, []);
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col justify-center items-center min-h-screen">
       <Head>
         <title>URLS</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <input
+        className="p-2 border border-gray-400"
         placeholder="paste URL here"
         ref={editDiv}
         onInput={async (e) => setURL(await fixURL(e.currentTarget.value))}
       ></input>
       {URL ? (
-        <>
-          <div id="out">{URL}</div>
-          <div id="out">{removeQueryString(URL)}</div>
-        </>
+        <div className="mt-5">
+          <div
+            className="max-w-md p-3 bg-gray-100 break-all cursor-pointer mb-3"
+            data-clipboard-target="#out"
+            id="out"
+          >
+            {removeQueryString(URL)}
+          </div>
+          <div
+            className="max-w-md p-3 bg-gray-100 break-all cursor-pointer text-gray-500"
+            data-clipboard-target="#out2"
+            id="out2"
+          >
+            {URL}
+          </div>
+        </div>
       ) : (
-        <div>Invalid URL</div>
+        <div className="text-red-500">Invalid URL</div>
       )}
-      <button data-clipboard-target="#out" />
     </div>
   );
 }

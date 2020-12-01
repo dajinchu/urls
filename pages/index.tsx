@@ -3,19 +3,28 @@ import { useState, useEffect, useRef } from "react";
 import styles from "../styles/Home.module.css";
 import ClipboardJS from "clipboard";
 
-async function fixURL(url: string): Promise<string> {
+async function fixURL(url: string): Promise<string | false> {
   const res = await fetch("/api/followurl", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ url }),
-  }).then((r) => r.json());
-  return res.url ? res.url.split(/[?#]/)[0] : "";
+  });
+  if (res.ok) {
+    const json = await res.json();
+    return json.url;
+  } else {
+    return false;
+  }
+}
+
+function removeQueryString(url: string): string {
+  return url.split(/[?#]/)[0];
 }
 
 export default function Home() {
-  const [URL, setURL] = useState("");
+  const [URL, setURL] = useState<string | false>("");
   const editDiv = useRef<HTMLInputElement>(null);
   useEffect(() => {
     new ClipboardJS("button");
@@ -32,7 +41,14 @@ export default function Home() {
         ref={editDiv}
         onInput={async (e) => setURL(await fixURL(e.currentTarget.value))}
       ></input>
-      <div id="out">{URL}</div>
+      {URL ? (
+        <>
+          <div id="out">{URL}</div>
+          <div id="out">{removeQueryString(URL)}</div>
+        </>
+      ) : (
+        <div>Invalid URL</div>
+      )}
       <button data-clipboard-target="#out" />
     </div>
   );
